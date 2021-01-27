@@ -1,0 +1,12 @@
+docker.withRegistry('http://docker-dev.global.dish.com') {
+
+        git branch: "develop",
+        url: "ssh://git@stash.dtc.dish.corp:7999/gopui/gopherui.git", credentialsId: 'gopherui-stash-token'
+
+        stage "build"
+        def app = docker.build "com/dish/handsfree/apigateway"
+
+        stage "publish"
+        app.push "develop"
+        app.push "latest"
+    }

@@ -1,0 +1,20 @@
+### Build
+
+FROM docker-dev.global.dish.com/com/dish/handsfree/docker/maven:3.6.2-oracle8u221 AS build
+
+ADD . /build/
+WORKDIR /build
+
+RUN mvn -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true -Dmaven.wagon.http.ssl.ignore.validity.dates=true clean install spring-boot:repackage
+
+### Runtime
+
+FROM docker-dev.global.dish.com/com/dish/handsfree/docker/java:oracle8u221
+
+LABEL source_url = https://stash.dtc.dish.corp/projects/GOPUI/repos/gopherui
+
+COPY --from=build /build/target/APIGateway.war /app/
+
+WORKDIR /app
+EXPOSE 8080
+CMD java -Dspring.profiles.active=docker -Dserver.port=$PORT -jar /app/*.war
